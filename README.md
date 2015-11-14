@@ -9,3 +9,9 @@ $ npm i -g tconv
 ```sh
 $ tconv
 ```
+
+### Custom server
+In default, tconv uses its dedicated server. To use custom server, edit app.js to
+```js
+var url = "http://yoururl"
+```
