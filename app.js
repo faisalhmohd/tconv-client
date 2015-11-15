@@ -4,22 +4,28 @@ var url = "http://128.199.93.87:3000/";
 
 var http = require('http');
 var socket = require('socket.io-client')(url);
-var inquirer = require("inquirer");
+var colors = require('colors');
+var readline = require('readline');
+var rl = readline.createInterface(process.stdin, process.stdout);
 
-console.log('tconv running, waiting to connect');
+console.log('tconv running, waiting to connect'.yellow);
 
 socket.on('connect', function(){
-  console.log('\ntconv connected');
+  console.log('tconv successfully connected\n\n'.green);
+  console.log('Welcome to tconv!\n\n');
     promptusername();
 });
 
 socket.on('new user', function(msg){
-  console.log('\n' + msg + ' has just joined');
+  if(msg != socket.username){
+    console.log('\n' + msg.blue + ' has just joined'.blue);
+    promptmessage();
+  }
 });
 
 socket.on('new message', function(msg){
   if(msg.user != socket.username){
-      console.log('\n~' + msg.user + ': ' + msg.message);
+      console.log(msg.user + ': ' + msg.message);
   }
 });
 
@@ -34,31 +40,29 @@ http.get(url,function(res) {
 });
 
 var promptusername = function () {
-  inquirer.prompt([
-    {
-      type: "input",
-      name: "username",
-      message: "Enter your username"
-    }
-  ], function( answers ) {
-      socket.username = answers.username;
+  rl.question("Enter a nickname: ", function(name) {
+      socket.username = name;
       socket.emit('new user', socket.username);
       promptmessage();
+      rl.prompt(true);
   });
 }
 
 var promptmessage = function () {
-  inquirer.prompt([
-    {
-      type: "input",
-      name: "message",
-      message: socket.username
+  rl.on('line', function (line) {
+    if (line[0] == "/" && line.length > 1) {
+        var cmd = line.match(/[a-z]+\b/)[0];
+        var arg = line.substr(cmd.length+2, line.length);
+        chat_command(cmd, arg);
+
+    } else {
+        // send chat message
+        socket.emit('new message',{
+          user: socket.username,
+          message: line
+        });
+        rl.prompt(true);
+        promptmessage();
     }
-  ], function( answers ) {
-      socket.emit('new message',{
-        user: socket.username,
-        message: answers.message
-      });
-      promptmessage();
-  });
+});
 }
