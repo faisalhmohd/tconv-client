@@ -12,11 +12,13 @@
     "convo",
     "socket.io",
     "command",
-    "prompt"
+    "prompt",
+    "realtime",
+    "personal"
   ],
   "repository": {
     "type": "git",
-    "url": "fasdas"
+    "url": "https://github.com/faisalmohd/tconv-client"
   },
   "author": "Mohammad Faisal",
   "license": "ISC",
