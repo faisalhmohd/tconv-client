@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-var url = "http://128.199.93.87:3000/";
+var url = "http://tconv.herokuapp.com/";
 
 var http = require('http');
 var socket = require('socket.io-client')(url);
