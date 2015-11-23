@@ -66,3 +66,10 @@ var promptmessage = function () {
     }
 });
 }
+
+var chat_command = function (cmd, arg) {
+  if(cmd == 'exit'){
+    console.log('No =P'.green);
+  }
+
+}
