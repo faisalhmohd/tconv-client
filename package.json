@@ -1,6 +1,6 @@
 {
   "name": "tconv",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Conversations via terminal/command prompt",
   "main": "app.js",
   "scripts": {
