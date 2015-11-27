@@ -4,72 +4,115 @@ var url = "http://tconv.herokuapp.com/";
 
 var http = require('http');
 var socket = require('socket.io-client')(url);
+var term = require( 'terminal-kit' ).terminal;
+var async = require('async');
 var colors = require('colors');
-var readline = require('readline');
-var rl = readline.createInterface(process.stdin, process.stdout);
 
-console.log('tconv running, waiting to connect'.yellow);
-
-socket.on('connect', function(){
-  console.log('tconv successfully connected\n\n'.green);
-  console.log('Welcome to tconv!\n\n');
-    promptusername();
+colors.setTheme({
+  initiate: ['yellow'],
+  success: 'green',
+  promptuser: 'blue',
+  error: 'red',
+  newuser: ['cyan','dim'],
+  messageuser: ['grey', 'bold'],
+  messagedata: ['grey'],
+  prompt: ['blue']
 });
 
-socket.on('new user', function(msg){
+socket.on('connect', function(){
+    console.log('Enter your nickname: '.prompt);
+      async.waterfall([
+        getusername,
+        transmitusername,
+      ],function (error, result) {
+        if(error){
+          console.log('Something went wrong'.error);
+        }
+        else {
+          term.clear();
+          console.log('You are chatting as #'.success + socket.username.success);
+          setup();
+        }
+      })
+});
+
+socket.on('incoming user', function(msg){
   if(msg != socket.username){
-    console.log('\n' + msg.blue + ' has just joined'.blue);
-    promptmessage();
+    console.log(msg.newuser + ' has just joined'.newuser);
   }
 });
 
-socket.on('new message', function(msg){
+socket.on('incoming message', function(msg){
   if(msg.user != socket.username){
-      console.log(msg.user + ': ' + msg.message);
+    console.log('#'.prompt + msg.user.messageuser + ' > '.prompt + msg.message.messagedata);
   }
 });
 
 socket.on('disconnect', function(){
-  console.log('I am disconnected');
+  term('I am disconnected');
 });
 
 http.get(url,function(res) {
-  res.on('end', function() {
-    console.log("Response completed");
-});
-});
+  res.on('data', function(d) {
+    })
+  }).on('error', function(error) {
+      console.log(error);
+  });
 
-var promptusername = function () {
-  rl.question("Enter a nickname: ", function(name) {
-      socket.username = name;
-      socket.emit('new user', socket.username);
-      promptmessage();
-      rl.prompt(true);
+var getusername = function (callback) {
+  return term.inputField([],function (error, result) {
+      if(error){
+        callback(error);
+      }
+      else {
+      callback(null, result)
+      }
+    });
+}
+
+var transmitusername = function (username, callback) {
+  socket.username = username;
+  socket.emit('new user', username);
+  callback(null, true)
+}
+
+var getmessage = function (callback) {
+  return term.inputField([],function (error, result) {
+    callback(null, result)
+    });
+}
+
+var transmitmessage = function(message, callback){
+  socket.emit('new message',{
+    user: socket.username,
+    message: message
+  });
+  callback(null, true);
+}
+
+var setup = function () {
+  async.waterfall([
+    function (callback) {
+      callback(null)
+    },
+    getmessage,
+    transmitmessage
+  ],function (error,result) {
+    if (error) {
+      console.log('Something went wrong'.error);
+      process.exit(0);
+    }
+    else {
+      console.log('');
+      setup();
+    }
   });
 }
 
-var promptmessage = function () {
-  rl.on('line', function (line) {
-    if (line[0] == "/" && line.length > 1) {
-        var cmd = line.match(/[a-z]+\b/)[0];
-        var arg = line.substr(cmd.length+2, line.length);
-        chat_command(cmd, arg);
-
-    } else {
-        // send chat message
-        socket.emit('new message',{
-          user: socket.username,
-          message: line
-        });
-        rl.prompt(true);
-        promptmessage();
-    }
-});
-}
-
-var chat_command = function (cmd, arg) {
-  if(cmd == 'exit'){
-    console.log('No =P'.green);
+term.on('key', function (name, matches, data) {
+  if ( name === 'CTRL_C' ){
+    console.log('tconv closing');
+    term.grabInput( false ) ;
+    setTimeout( function() { process.exit() } , 100 ) ;
   }
-
-}
+})
