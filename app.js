@@ -7,6 +7,8 @@ var socket = require('socket.io-client')(url);
 var term = require( 'terminal-kit' ).terminal;
 var async = require('async');
 var colors = require('colors');
+var notifier = require('node-notifier');
+
 
 colors.setTheme({
   initiate: ['yellow'],
@@ -39,12 +41,20 @@ socket.on('connect', function(){
 socket.on('incoming user', function(msg){
   if(msg != socket.username){
     console.log(msg.newuser + ' has just joined'.newuser);
+    notifier.notify({
+      'title': 'New User',
+      'message': msg + ' has joined your room'
+    });
   }
 });
 
 socket.on('incoming message', function(msg){
   if(msg.user != socket.username){
     console.log('#'.prompt + msg.user.messageuser + ' > '.prompt + msg.message.messagedata);
+    notifier.notify({
+      'title': msg.user,
+      'message': msg.message
+    });
   }
 });
 
