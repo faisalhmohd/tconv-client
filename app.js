@@ -1,128 +1,124 @@
 #! /usr/bin/env node
 
-var url = "http://tconv.herokuapp.com/";
-
-var http = require('http');
-var socket = require('socket.io-client')(url);
-var term = require( 'terminal-kit' ).terminal;
-var async = require('async');
-var colors = require('colors');
-var notifier = require('node-notifier');
-
+const url = "http://tconv.herokuapp.com/",
+    http = require('http'),
+    socket = require('socket.io-client')(url),
+    term = require('terminal-kit').terminal,
+    async = require('async'),
+    colors = require('colors'),
+    notifier = require('node-notifier');
 
 colors.setTheme({
-  initiate: ['yellow'],
-  success: 'green',
-  promptuser: 'blue',
-  error: 'red',
-  newuser: ['cyan','dim'],
-  messageuser: ['grey', 'bold'],
-  messagedata: ['grey'],
-  prompt: ['blue']
+    initiate: ['yellow'],
+    success: 'green',
+    promptuser: 'blue',
+    error: 'red',
+    newuser: ['cyan', 'dim'],
+    messageuser: ['grey', 'bold'],
+    messagedata: ['grey'],
+    prompt: ['blue']
 });
 
-socket.on('connect', function(){
+socket.on('connect', () => {
     console.log('Enter your nickname: '.prompt);
-      async.waterfall([
+    async.waterfall([
         getusername,
         transmitusername,
-      ],function (error, result) {
-        if(error){
-          console.log('Something went wrong'.error);
+    ], (error, result) => {
+        if (error) {
+            console.log('Something went wrong'.error);
+        } else {
+            term.clear();
+            console.log('You are chatting as #'.success + socket.username.success);
+            setup();
         }
-        else {
-          term.clear();
-          console.log('You are chatting as #'.success + socket.username.success);
-          setup();
-        }
-      })
-});
-
-socket.on('incoming user', function(msg){
-  if(msg != socket.username){
-    console.log(msg.newuser + ' has just joined'.newuser);
-    notifier.notify({
-      'title': 'New User',
-      'message': msg + ' has joined your room'
-    });
-  }
-});
-
-socket.on('incoming message', function(msg){
-  if(msg.user != socket.username){
-    console.log('#'.prompt + msg.user.messageuser + ' > '.prompt + msg.message.messagedata);
-    notifier.notify({
-      'title': msg.user,
-      'message': msg.message
-    });
-  }
-});
-
-socket.on('disconnect', function(){
-  term('I am disconnected');
-});
-
-http.get(url,function(res) {
-  res.on('data', function(d) {
     })
-  }).on('error', function(error) {
-      console.log(error);
-  });
+});
 
-var getusername = function (callback) {
-  return term.inputField([],function (error, result) {
-      if(error){
-        callback(error);
-      }
-      else {
-      callback(null, result)
-      }
+socket.on('incoming user', (msg) => {
+    if (msg != socket.username) {
+        console.log(msg.newuser + ' has just joined'.newuser);
+        notifier.notify({
+            'title': 'New User',
+            'message': msg + ' has joined your room'
+        });
+    }
+});
+
+socket.on('incoming message', (msg) => {
+    if (msg.user != socket.username) {
+        console.log('#'.prompt + msg.user.messageuser + ' > '.prompt + msg.message.messagedata);
+        notifier.notify({
+            'title': msg.user,
+            'message': msg.message
+        });
+    }
+});
+
+socket.on('disconnect', () => {
+    term('I am disconnected');
+});
+
+http.get(url, (res) => {
+    res.on('data', (d) => {})
+}).on('error', (error) => {
+    console.log(error);
+});
+
+var getusername = (callback) => {
+    return term.inputField([], (error, result) => {
+        if (error) {
+            callback(error);
+        } else {
+            callback(null, result)
+        }
     });
 }
 
-var transmitusername = function (username, callback) {
-  socket.username = username;
-  socket.emit('new user', username);
-  callback(null, true)
+var transmitusername = (username, callback) => {
+    socket.username = username;
+    socket.emit('new user', username);
+    callback(null, true)
 }
 
-var getmessage = function (callback) {
-  return term.inputField([],function (error, result) {
-    callback(null, result)
+var getmessage = (callback) => {
+    return term.inputField([], (error, result) => {
+        callback(null, result)
     });
 }
 
-var transmitmessage = function(message, callback){
-  socket.emit('new message',{
-    user: socket.username,
-    message: message
-  });
-  callback(null, true);
+var transmitmessage = (message, callback) => {
+    socket.emit('new message', {
+        user: socket.username,
+        message: message
+    });
+    callback(null, true);
 }
 
-var setup = function () {
-  async.waterfall([
-    function (callback) {
-      callback(null)
-    },
-    getmessage,
-    transmitmessage
-  ],function (error,result) {
-    if (error) {
-      console.log('Something went wrong'.error);
-      process.exit(0);
-    }
-    else {
-      console.log('');
-      setup();
-    }
-  });
+var setup = () => {
+    async.waterfall([
+        function(callback) {
+            callback(null)
+        },
+        getmessage,
+        transmitmessage
+    ], (error, result) => {
+        if (error) {
+            console.log('Something went wrong'.error);
+            process.exit(0);
+        } else {
+            console.log('');
+            setup();
+        }
+    });
 }
 
-term.on('key', function (name, matches, data) {
-  if ( name === 'CTRL_C' ){
-    console.log('tconv closing');
-    term.grabInput( false ) ;
-    setTimeout( function() { process.exit() } , 100 ) ;
-  }
+term.on('key', (name, matches, data) => {
+    if (name === 'CTRL_C') {
+        console.log('tconv closing');
+        term.grabInput(false);
+        setTimeout(() => {
+            process.exit()
+        }, 100);
+    }
 })
