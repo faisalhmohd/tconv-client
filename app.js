@@ -27,11 +27,11 @@ socket.on('connect', () => {
     ], (error, result) => {
         if (error) {
             console.log('Something went wrong'.error);
-        } else {
-            term.clear();
-            console.log('You are chatting as #'.success + socket.username.success);
-            setup();
+            return
         }
+        term.clear();
+        console.log('You are chatting as #'.success + socket.username.success);
+        setup();
     })
 });
 
@@ -65,53 +65,47 @@ http.get(url, (res) => {
     console.log(error);
 });
 
-var getusername = (callback) => {
-    return term.inputField([], (error, result) => {
-        if (error) {
-            callback(error);
-        } else {
+const getusername = (callback) => {
+        return term.inputField([], (error, result) => {
+            if (error) {
+                callback(error);
+            }
             callback(null, result)
-        }
-    });
-}
-
-var transmitusername = (username, callback) => {
-    socket.username = username;
-    socket.emit('new user', username);
-    callback(null, true)
-}
-
-var getmessage = (callback) => {
-    return term.inputField([], (error, result) => {
-        callback(null, result)
-    });
-}
-
-var transmitmessage = (message, callback) => {
-    socket.emit('new message', {
-        user: socket.username,
-        message: message
-    });
-    callback(null, true);
-}
-
-var setup = () => {
-    async.waterfall([
-        function(callback) {
-            callback(null)
-        },
-        getmessage,
-        transmitmessage
-    ], (error, result) => {
-        if (error) {
-            console.log('Something went wrong'.error);
-            process.exit(0);
-        } else {
+        });
+    },
+    transmitusername = (username, callback) => {
+        socket.username = username;
+        socket.emit('new user', username);
+        callback(null, true)
+    },
+    getmessage = (callback) => {
+        return term.inputField([], (error, result) => {
+            callback(null, result)
+        });
+    },
+    transmitmessage = (message, callback) => {
+        socket.emit('new message', {
+            user: socket.username,
+            message: message
+        });
+        callback(null, true);
+    },
+    setup = () => {
+        async.waterfall([
+            function(callback) {
+                callback(null)
+            },
+            getmessage,
+            transmitmessage
+        ], (error, result) => {
+            if (error) {
+                console.log('Something went wrong'.error);
+                process.exit(0);
+            }
             console.log('');
             setup();
-        }
-    });
-}
+        });
+    }
 
 term.on('key', (name, matches, data) => {
     if (name === 'CTRL_C') {
