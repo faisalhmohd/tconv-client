@@ -8,6 +8,48 @@ const url = "http://tconv.herokuapp.com/",
     colors = require('colors'),
     notifier = require('node-notifier');
 
+const getusername = (callback) => {
+        return term.inputField([], (error, result) => {
+            if (error) {
+                callback(error);
+            }
+            callback(null, result)
+        });
+    },
+    transmitusername = (username, callback) => {
+        socket.username = username;
+        socket.emit('new user', username);
+        callback(null, true)
+    },
+    getmessage = (callback) => {
+        return term.inputField([], (error, result) => {
+            callback(null, result)
+        });
+    },
+    transmitmessage = (message, callback) => {
+        socket.emit('new message', {
+            user: socket.username,
+            message: message
+        });
+        callback(null, true);
+    },
+    setup = () => {
+        async.waterfall([
+            function(callback) {
+                callback(null)
+            },
+            getmessage,
+            transmitmessage
+        ], (error, result) => {
+            if (error) {
+                console.log('Something went wrong'.error);
+                process.exit(0);
+            }
+            console.log('');
+            setup();
+        });
+    }
+
 colors.setTheme({
     initiate: ['yellow'],
     success: 'green',
@@ -64,48 +106,6 @@ http.get(url, (res) => {
 }).on('error', (error) => {
     console.log(error);
 });
-
-const getusername = (callback) => {
-        return term.inputField([], (error, result) => {
-            if (error) {
-                callback(error);
-            }
-            callback(null, result)
-        });
-    },
-    transmitusername = (username, callback) => {
-        socket.username = username;
-        socket.emit('new user', username);
-        callback(null, true)
-    },
-    getmessage = (callback) => {
-        return term.inputField([], (error, result) => {
-            callback(null, result)
-        });
-    },
-    transmitmessage = (message, callback) => {
-        socket.emit('new message', {
-            user: socket.username,
-            message: message
-        });
-        callback(null, true);
-    },
-    setup = () => {
-        async.waterfall([
-            function(callback) {
-                callback(null)
-            },
-            getmessage,
-            transmitmessage
-        ], (error, result) => {
-            if (error) {
-                console.log('Something went wrong'.error);
-                process.exit(0);
-            }
-            console.log('');
-            setup();
-        });
-    }
 
 term.on('key', (name, matches, data) => {
     if (name === 'CTRL_C') {
