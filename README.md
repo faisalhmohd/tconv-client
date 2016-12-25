@@ -3,6 +3,8 @@ Conversations via terminal.
 
 **This Repo is currently in BETA. New features available in the v1 branch.**
 
+**Standard features will be added such as group chat, better interface and easy customization for self hosting chat server**
+
 ### Installation
 ```sh
 $ npm i -g tconv
