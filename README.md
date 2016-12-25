@@ -7,3 +7,4 @@ Conversations via terminal.
 
 ## To be added
 - Docker environment for Windows, OSX and Linux
+- Create and Delete Channels
