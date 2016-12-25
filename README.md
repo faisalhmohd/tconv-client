@@ -1,6 +1,8 @@
 # tconv
 Conversations via terminal.
 
+**This Repo is currently in BETA. New features available in the v1 branch.**
+
 ### Installation
 ```sh
 $ npm i -g tconv
