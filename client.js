@@ -13,7 +13,7 @@ var mainContent = blessed.box({
   height: '95%',
   align: 'center',
   valign: 'middle',
-  content: 'Starting up tconv session ... \n\nPlease enter your username',
+  content: 'Starting up tconv session [setting up] ..... \n\nPlease enter your username',
   tags: true,
   border: {
     type: 'line'
