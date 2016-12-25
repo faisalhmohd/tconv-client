@@ -2,7 +2,7 @@
   "name": "tconv",
   "version": "1.1.2",
   "description": "Conversations via terminal/command prompt",
-  "main": "client.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node client.js"
@@ -29,7 +29,6 @@
   "preferGlobal": true,
   "dependencies": {
     "async": "^1.5.0",
-    "blessed": "^0.1.81",
     "colors": "^1.1.2",
     "express": "^4.10.2",
     "node-notifier": "^4.3.1",
